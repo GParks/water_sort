@@ -12,23 +12,36 @@ const NUM_SLOTS = 4
 const NUM_TUBES = 14
 
 const (
-	NC     = iota // 0 --> no color
-	RED    = iota
-	GREEN  = iota
-	BLUE   = iota
-	YELLOW = iota
-	PURPLE = iota
-	ORANGE = iota
+	NC         =  iota // 0 --> no color
+	RED        =  iota
+	GREEN      =  iota
+	OLIVE      =  iota
+	LTBLUE     =  iota
+	BLUE       =  iota
+	YELLOW     =  iota
+	PURPLE     =  iota
+	ORANGE     =  iota
+	BROWN      =  iota
+	PINK       =  iota
+	NEONGREEN  =  iota
+	GRAY       =  iota
 )
 
 // corresponding array of "names" -- I'll figure out how to use this later
 var color_names = []string{
+	"*** No Color ***",
 	"Red",
 	"Green",
+	"Olive", 
+	"LiteBlue", 
 	"Blue",
 	"Yellow",
 	"Purple",
-	"Orange"}
+	"Orange", 
+	"Brown", 
+	"Pink", 
+	"NeonGreen",
+	"Gray"}
 
 func colorOfName(s string) int {
 	for i, n := range color_names {
@@ -129,6 +142,33 @@ func loadBoard(fn string) Board, err {
 
 	return b
 }
+
+func (b Board) String() string {
+	var s string
+	for j := NUM_SLOTS-1; j >= 0 ; j-- {
+		for i := 0; i < NUM_TUBES/2; i++ {
+			if color_names[b.tubes[i].slots[j]] ; c == NC {
+				s += fmt.Sprintf("           ")
+			} else {
+				s += fmt.Sprintf(" %9s ", color_names[c])
+			}
+		}
+		s += "\n"
+	}
+	s += "\n"
+	for j := NUM_SLOTS-1; j >= 0; j-- {
+		for i := NUM_TUBES/2; i < NUM_TUBES; i++ {
+			if color_names[b.tubes[i].slots[j]] ; c == NC {
+				s += fmt.Sprintf("           ")
+			} else {
+				s += fmt.Sprintf(" %9s ", color_names[c])
+			}
+		}
+		s += "\n"
+	}
+	return s
+}
+
 
 func (b Board) valid_moves() list.List {
 	var moves list.List
