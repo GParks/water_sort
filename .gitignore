@@ -20,3 +20,8 @@
 # Go workspace file
 go.work
 board.go_bak
+.DS_Store
+solv_watr_sort
+test_run_*.txt
+*.gz
+.vscode/launch.json
