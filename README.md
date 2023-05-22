@@ -19,23 +19,21 @@ I've used IDEs that no longer exist, I've used Eclipse, my "favorite" at the mom
 CoPilot needed [`VS Code`](https://code.visualstudio.com/docs#vscode), so I adapted.  My personal dev work had been stalled, 
 so I needed a jump start on that, and this seemed as good a chance as any.
 
-## *Golang** (https://github.com/golang)
+## **Golang** (https://github.com/golang)
 Learning <kbd>Go</kbd> was somewhat challenging, even with CoPilot, for two reasons -- learning file/module organization, 
 and one 'feature' I wasn't expecting to have trouble with: pointers (and/or "pass by value" vs. "pass by reference")
 First, CoPilot was no help organizing my methods into separate files, and putting more than one in the same *module*.
 I did various searches, even asking [`ChatGPT`](https://chat.openai.com/), and using <https://you.com/>. <br>
 The best answer I found was on [StackOverflow](https://stackoverflow.com/questions/9985559/20188012#20188012). 
 
-CoPilot helped me, let me write methods like this:
+As for <kbd>CoPilot</kbd>, well...  it helped me, let me write methods like this:
 ```go
 func (t Tube) add(c int) {
 	t.slots[t.num_used] = c
 	t.num_used++
 }
 ```
-
 and 
-
 ```go 
 func (t Tube) pour() int {
 	if t.num_used < NUM_SLOTS {
@@ -45,3 +43,33 @@ func (t Tube) pour() int {
 	return t.slots[t.num_used+1]
 }
 ```
+<br/>
+And I spent far too long figuring out why this didn't actually <em>change</em> anything; here's the working version, now: 
+
+```go
+func (t *Tube) add(c int) {
+	t.slots[t.num_used] = c
+	t.num_used++
+	// fmt.Printf("  \t  dbg: Added %s to this tube, now %d 'used'\n", color_names[c], t.num_used)
+}
+```
+and 
+```go
+func (t *Tube) pour() int {
+	var retColor = NC
+	if t.num_used > 0 {
+		retColor = t.slots[t.num_used-1]
+		t.num_used--
+		t.slots[t.num_used] = NC
+	} // else {
+	// 	return NC
+	//}
+	return retColor
+}
+```
+&mdash;never mind the other bug(s) found/fixed, in order to modify the *`struct`* which was created, I needed to define these functions to work on a *pointer*!
+
+And that's probably also on me.  I like that CoPilot helped -- the "auto-complete" of functions by hitting tab has really been a time saver; it has given me code that is syntactically correct, and usually pretty close to the semantics I was after; but there are things that it does not understand. <br>
+As always, I need to remember to continue to use the two and a half pound computer situated betweeen my ears.
+
+Nonetheless, **<kbd>CoPilot</kbd>** is something that I can see myself using, and actually enjoying.
