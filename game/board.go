@@ -12,6 +12,9 @@ import (
 const NUM_SLOTS = 4
 const NUM_TUBES = 14
 
+/**
+ * there must be some way to create an enum, but I don't know how -- yet
+ */
 const (
 	NC        = iota // 0 --> no color
 	RED       = iota
@@ -44,6 +47,8 @@ var color_names = []string{
 	"NeonGreen",
 	"Gray"}
 
+// string (i.e. "Green", "Purple") to int conversion
+// only used internally, not exported
 func colorOfName(s string) int {
 	for i, n := range color_names {
 		if n == s {
@@ -53,6 +58,7 @@ func colorOfName(s string) int {
 	return NC
 }
 
+// int to string
 func ColorName(c int) string {
 	return color_names[c]
 }
@@ -64,34 +70,38 @@ type Tube struct {
 }
 
 func (t Tube) Top() int {
-	// for i := NUM_SLOTS; i >= 0; i--  {
-	//     if t.slots[i] != NC {
-	//         return t.slots[i]
-	//     }
-	// }
-	// return NC
 	retColor := NC
 	if t.num_used > 0 {
 		retColor = t.slots[t.num_used-1]
 	}
-	// fmt.Println("  \t  dbg: Top() returning ", color_names[retColor])
 	return retColor
 }
 
 func (t Tube) IsEmpty() bool {
-	// return t.top() == NC
 	return t.num_used == 0
 }
 
 func (t Tube) IsFull() bool {
-	// return t.slots[NUM_SLOTS-1] != NC
 	return t.num_used == NUM_SLOTS
+}
+
+func (t Tube) IsDone() bool {
+	return t.done
 }
 
 func (t *Tube) add(c int) {
 	t.slots[t.num_used] = c
 	t.num_used++
 	// fmt.Printf("  \t  dbg: Added %s to this tube, now %d 'used'\n", color_names[c], t.num_used)
+	if t.IsFull() {
+		for i := 0; i < NUM_SLOTS-1; i++ {
+			if t.slots[i] != c {
+				return
+			}
+		}
+		// IFF this tube is full and all the same color, then it's done
+		t.done = true
+	}
 }
 
 func (t Tube) debug() {
@@ -217,6 +227,24 @@ func (b Board) String() string {
 	return s
 }
 
+func (b Board) Encode() string {
+	var s string
+	c := " RGobBYVOWPNa"
+	/*
+	 *      Red,         Green,    (o)live,
+	 *   lite(b)lue,      Blue,    Yellow,
+	 * Violet [Purple],  Orange,   bro(w)n,
+	 *     Pink,        NeonGreen, gr(a)y
+	 */
+	for i := 0; i < NUM_TUBES; i++ {
+		for j := 0; j < NUM_SLOTS; j++ {
+			n := b.tubes[i].slots[j]
+			s += c[n : n+1]
+		}
+	}
+	return s
+}
+
 func (b Board) IsBlank() bool {
 	for i := 0; i < NUM_TUBES; i++ {
 		if !b.tubes[i].IsEmpty() {
@@ -231,22 +259,33 @@ func (b Board) ValidMoves() list.List {
 	for fr := 0; fr < NUM_TUBES; fr++ {
 		for to := 0; to < NUM_TUBES; to++ {
 			// fmt.Println("  dbg: checking ", fr, " to ", to)
-			if fr != to && !b.tubes[fr].IsEmpty() && !b.tubes[to].IsFull() {
+			if fr != to && !b.tubes[fr].IsEmpty() &&
+				!b.tubes[fr].IsDone() &&
+				!b.tubes[to].IsFull() {
 				if b.tubes[to].IsEmpty() ||
 					b.tubes[fr].Top() == b.tubes[to].Top() {
-					// var m Move
-					// m.src = fr
-					// m.dst = to
 					moves.PushBack(Move{fr, to, b.tubes[fr].Top()})
 				}
 			}
 		}
 	}
+	/**
+	 * I should filter out moves that are "regressing" ...
+	 *  (this might be tricky)
+	 */
 	return moves
 }
 
+func (b *Board) SaveMove(m Move) {
+	b.moves.PushBack(m)
+}
+
+func (b Board) Top(t int) int {
+	return b.tubes[t].Top()
+}
+
 // this should *copy* the board, not modify the original
-func (b Board) DoMove(m Move) Board {
+func (b Board) DoMove(m Move, quiet bool) Board {
 	r := b
 	// for r.Add(m.Dst, r.tubes[m.Src].pour()); r.tubes[m.Dst].Top() == r.tubes[m.Src].Top() &&
 	// 	!r.tubes[m.Dst].IsFull(); r.Add(m.Dst, r.tubes[m.Src].pour()) {
@@ -258,6 +297,27 @@ func (b Board) DoMove(m Move) Board {
 		!r.tubes[m.Dst].IsFull() {
 		r.Add(m.Dst, r.tubes[m.Src].pour())
 	}
-	fmt.Printf("      DoMove: all poured:\n%s\n", r)
+	if !quiet {
+		fmt.Printf("      DoMove: all poured:\n%s\n", r)
+	}
+	r.SaveMove(m)
 	return r
+}
+
+func (b Board) IsSolved() bool {
+	for i := 0; i < NUM_TUBES; i++ {
+		if !b.tubes[i].IsDone() {
+			return false
+		}
+	}
+	return true
+}
+
+func (b Board) NumMoves() int {
+	return b.moves.Len()
+}
+func (b Board) PrintMoves() {
+	for e := b.moves.Front(); e != nil; e = e.Next() {
+		fmt.Println(e.Value)
+	}
 }

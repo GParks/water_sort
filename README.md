@@ -26,6 +26,27 @@ First, CoPilot was no help organizing my methods into separate files, and puttin
 I did various searches, even asking [`ChatGPT`](https://chat.openai.com/), and using <https://you.com/>. <br>
 The best answer I found was on [StackOverflow](https://stackoverflow.com/questions/9985559/20188012#20188012). 
 
+### Links/Refs
+Among the tabs I still have open, or have used, there are these: 
+* ["Return and handle an error"](https://go.dev/doc/tutorial/handle-errors)
+* [Standard library](https://pkg.go.dev/std)
+  * [container](https://pkg.go.dev/container@go1.20.4)
+    * [list](https://pkg.go.dev/container/list@go1.20.4#List)
+* ["How to check if a slice contains an element in Golang?"](https://www.tutorialspoint.com/how-to-check-if-a-slice-contains-an-element-in-golang)
+* <https://go.dev/doc/code>
+* **[Effective Go](https://go.dev/doc/effective_go)**
+  * [errors](https://go.dev/doc/effective_go#errors)
+
+* [Go Resources](https://www.golang-book.com/11)
+  * ["An Introduction to Programming in Go"](https://www.golang-book.com/books/intro)
+* <https://go.dev/learn/>
+* [A Tour of Go](https://go.dev/tour/)
+  * ["For continued"](https://go.dev/tour/flowcontrol/2)
+
+* [Structures in Go](https://medium.com/rungo/structures-in-go-76377cc106a2)
+
+
+## CoPilot
 As for <kbd>CoPilot</kbd>, well...  it helped me, let me write methods like this:
 ```go
 func (t Tube) add(c int) {
