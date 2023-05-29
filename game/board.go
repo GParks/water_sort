@@ -167,7 +167,7 @@ func LoadBoard(fn string) (Board, error) {
 
 			 * return Board{}, errors.New("not enough lines in th file; only " + strconv.Itoa(i))
 			 */
-			fmt.Println("  dbg: fewer lines, only ", i, "; exiting here")
+			fmt.Println("    LoadBoard: fewer lines, only ", i, "; exiting here")
 			break
 		}
 		l := s.Text()
@@ -229,7 +229,7 @@ func (b Board) String() string {
 
 func (b Board) Encode() string {
 	var s string
-	c := " RGobBYVOWPNa"
+	c := "_RGobBYVOWPNa"
 	/*
 	 *      Red,         Green,    (o)live,
 	 *   lite(b)lue,      Blue,    Yellow,
@@ -287,9 +287,24 @@ func (b Board) Top(t int) int {
 // this should *copy* the board, not modify the original
 func (b Board) DoMove(m Move, quiet bool) Board {
 	r := b
-	// for r.Add(m.Dst, r.tubes[m.Src].pour()); r.tubes[m.Dst].Top() == r.tubes[m.Src].Top() &&
-	// 	!r.tubes[m.Dst].IsFull(); r.Add(m.Dst, r.tubes[m.Src].pour()) {
-	// }
+	/**
+	 * I wished things worked as 'simply' as this (maybe I can do it later)
+	 * for r.Add(m.Dst, r.tubes[m.Src].pour()); r.tubes[m.Dst].Top() == r.tubes[m.Src].Top() &&
+	 * 	!r.tubes[m.Dst].IsFull(); r.Add(m.Dst, r.tubes[m.Src].pour()) {
+	 * }
+	 **/
+
+	/**
+	 * I regretted trying to add err return here;
+	 * currently, all my code assumes that DoMove will succeed
+	 * (i.e. the colors match, source and destination are 'valid,' etc.)
+	 * if r.tubes[m.Src].Top() != m.Color {
+	 * 	fmt.Printf("      DoMove: ERROR: `Top` of tubes[%d] = %s, move color is %s\n",
+	 * 		m.Src, color_names[r.tubes[m.Src].Top()], color_names[m.Color])
+	 * 	return Board{}, errors.New("DoMove: source tube Top is not the color of the move")
+	 * }
+	 **/
+
 	r.Add(m.Dst, r.tubes[m.Src].pour())
 	// fmt.Println("    DoMove: after pouring:")
 	// fmt.Println(r)
@@ -311,6 +326,27 @@ func (b Board) IsSolved() bool {
 		}
 	}
 	return true
+}
+
+func (b Board) Equals(othr Board) bool {
+	// fmt.Println("\t  \t  dbg: comparing boards")
+	// NOTE:
+	// right now (5/28/2023), I could, *theoretically*, just compare the
+	// tubes array(s)  (i.e. `b.tubes != ohtr.tubes`)
+	// however, (1) I wouldn't be able to debug which tube is different
+	// and, (2) I might want to add more fields to the Tube struct later...
+	for i := 0; i < NUM_TUBES; i++ {
+		if !b.tubes[i].Equals(othr.tubes[i]) {
+			// fmt.Printf("\t  \t  dbg: tubes at %d  are not equal\n", i)
+			return false
+		}
+	}
+	return true
+}
+
+func Equal(b1, b2 Board) bool {
+	fmt.Println("\t  \t  dbg: comparing two boards")
+	return b1.Equals(b2)
 }
 
 func (b Board) NumMoves() int {

@@ -8,6 +8,7 @@ import (
 )
 
 var pfQuiet = flag.Bool("q", false, "quiet mode")
+var bDebug bool = false
 
 func pop(l *list.List) game.Board {
 	f := l.Front()
@@ -20,15 +21,25 @@ func pop(l *list.List) game.Board {
 }
 
 func maybeAdd(a, b *list.List, n game.Board) bool {
-	fmt.Println("    maybeAdd: ")
+	if !*pfQuiet {
+		fmt.Println("    maybeAdd: ")
+	}
 	// fmt.Println(n)
 	idx := 0
 	for e := a.Front(); e != nil; e = e.Next() {
-		if n == e.Value.(game.Board) {
+		r := e.Value.(game.Board)
+		if n.Equals(r) {
 			if !*pfQuiet {
 				fmt.Println("      already in open list at", idx)
 			}
+			if bDebug {
+				fmt.Printf(" \t  \t (%s == %s) [a]\n", n.Encode(), r.Encode())
+			}
 			return false
+		} else {
+			if bDebug {
+				fmt.Printf(" \t  \t (%s != %s) [a]\n", n.Encode(), r.Encode())
+			}
 		}
 		idx++
 	}
@@ -36,20 +47,41 @@ func maybeAdd(a, b *list.List, n game.Board) bool {
 		fmt.Println("    after checking first list (open), checking second (closed)")
 	}
 	idx = 0
-	for e := b.Front(); e != nil; e = e.Next() {
-		if n == e.Value.(game.Board) {
+	/* what am I missing here ? */
+	for e2 := b.Front(); e2 != nil; e2 = e2.Next() {
+		r := e2.Value.(game.Board)
+		if n.Equals(r) {
 			if !*pfQuiet {
-				fmt.Println("      already in open list at", idx)
+				fmt.Println("      already in closed list at", idx)
+			}
+			if bDebug {
+				fmt.Printf(" \t  \t (%s == %s) [b]\n", n.Encode(), r.Encode())
 			}
 			return false
+		} else {
+			if bDebug {
+				fmt.Printf(" \t  \t (%s != %s) [b]\n", n.Encode(), r.Encode())
+			}
 		}
 		idx++
 	}
 	if !*pfQuiet {
 		fmt.Println("    not in either list, adding to 1st (open)")
+		fmt.Printf(" \t  \t adding %s \n", n.Encode())
 	}
 	a.PushFront(n)
 	return true
+}
+
+func printList(l list.List, terse bool) {
+	for e := l.Front(); e != nil; e = e.Next() {
+		if terse {
+			fmt.Printf(" \t  %s\n", e.Value.(game.Board).Encode())
+		} else {
+			fmt.Println(e.Value)
+			fmt.Println()
+		}
+	}
 }
 
 func main() {
@@ -77,6 +109,13 @@ func main() {
 	// }
 	// var fn string
 	// flag.StringVar(&fn, "f", "", "filename")
+
+	var iter int
+	var bVerbose bool
+	flag.IntVar(&iter, "i", 5, "number of iterations")
+	flag.BoolVar(&bDebug, "d", false, "debug mode")
+	flag.BoolVar(&bVerbose, "v", false, "verbose mode")
+
 	flag.Parse()
 
 	// fmt.Println("\t 'second' = " + os.Args[1])
@@ -98,16 +137,21 @@ func main() {
 	open := list.List{}
 	var closed list.List
 
+	gate := 150
+
 	open.PushBack(init)
 	for next := pop(&open); !next.IsBlank(); next = pop(&open) {
 		if !(*pfQuiet) {
 			fmt.Println("\n\t after popping next, the open list contains", open.Len(), "items, and "+
 				"the closed list contains", closed.Len(), "items")
-			fmt.Println("next = ")
-			fmt.Println(next)
+			if bVerbose {
+				fmt.Println("next = ")
+				fmt.Println(next)
+			}
 		}
 		ms := next.ValidMoves()
 		// fmt.Printf("    %d (new) valid moves\n", ms.Len())
+		cntMoves := 0
 		for m := ms.Front(); m != nil; m = m.Next() {
 			x := m.Value.(game.Move)
 			if !*pfQuiet {
@@ -120,24 +164,38 @@ func main() {
 			// 	fmt.Println("Solved!")
 			// 	return
 			// }
-			maybeAdd(&open, &closed, n)
+			if maybeAdd(&open, &closed, n) {
+				cntMoves++
+			}
 
 			if n.IsSolved() {
-				fmt.Println("\n\t Solved!\n")
+				fmt.Printf("\n\t Solved!\n\n")
+				fmt.Println(n)
 				n.PrintMoves()
+			}
+			if cntMoves == 0 {
+				fmt.Println("	no moves from here")
+				fmt.Println(n)
 			}
 		}
 		closed.PushBack(next)
+
 		fmt.Println("\n\t after `pushing back` next, the open list contains", open.Len(), "items, and",
 			"the closed list contains", closed.Len(), "items")
-		if (closed.Len() % 2500) == 0 {
-			for e := closed.Front(); e != nil; e = e.Next() {
-				fmt.Printf(" \t  %s\n", e.Value.(game.Board).Encode())
-			}
-			fmt.Println()
-			for o := open.Front(); o != nil; o = o.Next() {
-				fmt.Printf("      %s\n", o.Value.(game.Board).Encode())
-			}
+		// if (closed.Len() % 2500) == 0 {
+		if closed.Len() > gate {
+			fmt.Println(" ** closed list contains", closed.Len(), "items")
+			printList(closed, !bVerbose)
+			fmt.Println("\t open list:")
+			printList(open, !bVerbose)
+			gate *= 5
+		}
+		if iter--; iter == 0 {
+			fmt.Println(" ** closed list contains", closed.Len(), "items")
+			printList(closed, !bVerbose)
+			fmt.Println("\t open list:")
+			printList(open, !bVerbose)
+			break
 		}
 	}
 

@@ -1,6 +1,8 @@
 package game
 
-import "testing"
+import (
+	"testing"
+)
 
 func (ck Board) check_initial_conditions(t *testing.T) {
 	/**
@@ -32,11 +34,16 @@ func (ck Board) check_initial_conditions(t *testing.T) {
 }
 
 func TestCopyCtor(t *testing.T) {
-	b, e := LoadBoard("first.brd") // this makes certain assumptions about the existence of that file
+	b, e := LoadBoard("../first.brd") // this makes certain assumptions about the existence of that file
 	if e != nil {
 		t.Errorf("couldn't load boardL %s", e)
+		return
 	}
+	t.Log("Loaded board:")
+	t.Log(b)
 	b.check_initial_conditions(t)
+	t.Log("checked initial conditions")
+
 	ms := b.ValidMoves()
 	if ms.Len() != 24 {
 		t.Error("there should be 24 valid moves")

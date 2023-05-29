@@ -25,3 +25,5 @@ solv_watr_sort
 test_run_*.txt
 *.gz
 .vscode/launch.json
+three_iters*.txt
+two_iters.txt
