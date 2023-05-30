@@ -21,23 +21,22 @@ func pop(l *list.List) game.Board {
 }
 
 func maybeAdd(a, b *list.List, n game.Board) bool {
-	if !*pfQuiet {
+	if bDebug {
 		fmt.Println("    maybeAdd: ")
 	}
-	// fmt.Println(n)
 	idx := 0
 	for e := a.Front(); e != nil; e = e.Next() {
 		r := e.Value.(game.Board)
 		if n.Equals(r) {
-			if !*pfQuiet {
+			if bDebug {
 				fmt.Println("      already in open list at", idx)
 			}
-			if bDebug {
+			if !*pfQuiet {
 				fmt.Printf(" \t  \t (%s == %s) [a]\n", n.Encode(), r.Encode())
 			}
 			return false
 		} else {
-			if bDebug {
+			if !*pfQuiet {
 				fmt.Printf(" \t  \t (%s != %s) [a]\n", n.Encode(), r.Encode())
 			}
 		}
@@ -51,22 +50,24 @@ func maybeAdd(a, b *list.List, n game.Board) bool {
 	for e2 := b.Front(); e2 != nil; e2 = e2.Next() {
 		r := e2.Value.(game.Board)
 		if n.Equals(r) {
-			if !*pfQuiet {
+			if bDebug {
 				fmt.Println("      already in closed list at", idx)
 			}
-			if bDebug {
+			if !*pfQuiet {
 				fmt.Printf(" \t  \t (%s == %s) [b]\n", n.Encode(), r.Encode())
 			}
 			return false
 		} else {
-			if bDebug {
+			if !*pfQuiet {
 				fmt.Printf(" \t  \t (%s != %s) [b]\n", n.Encode(), r.Encode())
 			}
 		}
 		idx++
 	}
-	if !*pfQuiet {
+	if bDebug {
 		fmt.Println("    not in either list, adding to 1st (open)")
+	}
+	if !*pfQuiet {
 		fmt.Printf(" \t  \t adding %s \n", n.Encode())
 	}
 	a.PushFront(n)
@@ -118,15 +119,14 @@ func main() {
 
 	flag.Parse()
 
-	// fmt.Println("\t 'second' = " + os.Args[1])
 	fn := flag.Arg(0)
-	fmt.Println("\t \"zeroth\" arg = " + fn)
+	// fmt.Println("\t \"zeroth\" arg = " + fn)
 
-	if *pfQuiet {
-		fmt.Println("  quiet mode!")
-	} else {
-		fmt.Println("  not quiet mode!")
-	}
+	// if *pfQuiet {
+	// 	fmt.Println("  quiet mode!")
+	// } else {
+	// 	fmt.Println("  not quiet mode!")
+	// }
 
 	init, err := game.LoadBoard(fn)
 	if err != nil {
@@ -140,44 +140,47 @@ func main() {
 	gate := 150
 
 	open.PushBack(init)
+	/**
+	 ** primary loop starts here
+	 **/
 	for next := pop(&open); !next.IsBlank(); next = pop(&open) {
-		if !(*pfQuiet) {
-			fmt.Println("\n\t after popping next, the open list contains", open.Len(), "items, and "+
-				"the closed list contains", closed.Len(), "items")
-			if bVerbose {
-				fmt.Println("next = ")
-				fmt.Println(next)
+		if bVerbose {
+			if !*pfQuiet {
+				fmt.Println("\n\t after popping next, the open list contains", open.Len(), "items, and "+
+					"the closed list contains", closed.Len(), "items")
 			}
+			fmt.Println("next = ")
+			fmt.Println(next)
 		}
 		ms := next.ValidMoves()
-		// fmt.Printf("    %d (new) valid moves\n", ms.Len())
+		if bDebug {
+			fmt.Printf("    %d (new) valid moves\n", ms.Len())
+		}
 		cntMoves := 0
 		for m := ms.Front(); m != nil; m = m.Next() {
 			x := m.Value.(game.Move)
 			if !*pfQuiet {
-				fmt.Printf("    next move is %s from %d to %d\n", game.ColorName(x.Color),
-					x.Src, x.Dst)
+				fmt.Printf("    next move is %s from %d to %d\n",
+					game.ColorName(x.Color),
+					x.Src,
+					x.Dst)
 			}
-			n := next.DoMove(x, *pfQuiet)
-			// TO DO: Coming Soon!!!
-			// if n.IsSolved() {
-			// 	fmt.Println("Solved!")
-			// 	return
-			// }
-			if maybeAdd(&open, &closed, n) {
-				cntMoves++
-			}
+			n := next.DoMove(x, !bDebug)
 
 			if n.IsSolved() {
 				fmt.Printf("\n\t Solved!\n\n")
 				fmt.Println(n)
 				n.PrintMoves()
+			} else if maybeAdd(&open, &closed, n) {
+				cntMoves++
 			}
-			if cntMoves == 0 {
-				fmt.Println("	no moves from here")
-				fmt.Println(n)
-			}
+
 		}
+		if cntMoves == 0 {
+			fmt.Println("	no new moves from here")
+			fmt.Println(next)
+		}
+
 		closed.PushBack(next)
 
 		fmt.Println("\n\t after `pushing back` next, the open list contains", open.Len(), "items, and",
@@ -187,7 +190,7 @@ func main() {
 			fmt.Println(" ** closed list contains", closed.Len(), "items")
 			printList(closed, !bVerbose)
 			fmt.Println("\t open list:")
-			printList(open, !bVerbose)
+			printList(open, true)
 			gate *= 5
 		}
 		if iter--; iter == 0 {

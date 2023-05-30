@@ -257,14 +257,16 @@ func (b Board) IsBlank() bool {
 func (b Board) ValidMoves() list.List {
 	var moves list.List
 	for fr := 0; fr < NUM_TUBES; fr++ {
-		for to := 0; to < NUM_TUBES; to++ {
-			// fmt.Println("  dbg: checking ", fr, " to ", to)
-			if fr != to && !b.tubes[fr].IsEmpty() &&
-				!b.tubes[fr].IsDone() &&
-				!b.tubes[to].IsFull() {
-				if b.tubes[to].IsEmpty() ||
-					b.tubes[fr].Top() == b.tubes[to].Top() {
-					moves.PushBack(Move{fr, to, b.tubes[fr].Top()})
+		if !b.tubes[fr].IsEmpty() &&
+			!b.tubes[fr].IsDone() {
+			for to := 0; to < NUM_TUBES; to++ {
+				// fmt.Println("  dbg: checking ", fr, " to ", to)
+				if fr != to &&
+					!b.tubes[to].IsFull() {
+					if b.tubes[to].IsEmpty() ||
+						b.tubes[fr].Top() == b.tubes[to].Top() {
+						moves.PushBack(Move{fr, to, b.tubes[fr].Top()})
+					}
 				}
 			}
 		}
@@ -352,6 +354,7 @@ func Equal(b1, b2 Board) bool {
 func (b Board) NumMoves() int {
 	return b.moves.Len()
 }
+
 func (b Board) PrintMoves() {
 	for e := b.moves.Front(); e != nil; e = e.Next() {
 		fmt.Println(e.Value)
