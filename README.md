@@ -7,7 +7,7 @@ This project had many goals:
   * for my own benefit, for reference
   * for 'education' and sharing
 
-See [the Go ReadMe](go/README.md) for a link to the game/app in the App Store
+See [the Go ReadMe](go/solv_watr_sort/README.md) for a link to the game/app in the App Store
 
 <kbd>Go</kbd> was the first language; I'm listing my project thus:
 
