@@ -111,3 +111,12 @@ Additionally, I need to be able to `ShowMoves` when I want to actually _figure o
 
 Later, I'll have to add heuristics, and determine what "closer to done" looks like, and what is a "good" path &ndash; 
 then implement a "best-first" search, storing the open list in a "priority queue" or some "ordered," (sorted) data structure.
+
+## "SofA" (State of Affairs) end of May, 2023
+With version 1 of `Equals` (for a `Board`), I let this prog. run for over a day -- it took more than a day to get to 400,000 on the "closed list" (1 d. 2 1/2 hrs); 
+due to how I structured dumping out the current closed list, I'm letting it run past 468,751 (150* 5^5 +1).
+
+### What I think of <kbd><b>Go</b></kbd>
+At this point, disappointed by two features that are missing -- *enums* and no operator-overloading (so I can't define 'b1 == b2' to be other than "all fields of the struct (or orray) match...) <br>
+Those two features aside, I like that it compiles to a binary; learning cmd-line arg. processing wasn't hard (though there was a minor gotcha: processing stops at the first non-matched, so `prog -q first.brd` isn't the same as `prog first.brd -q`); <br>
+I'd like to learn more about *interfaces*, but it seems to match <kbd>Clojure</kbd> in my mind, how `def-protocol` behaves&mdash;though without strict declaration, so that could make some debugging of design "tricky," if a developer were to miss (or *mis-type*) a func. name, for example
