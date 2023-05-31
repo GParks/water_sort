@@ -173,7 +173,6 @@ func LoadBoard(fn string) (Board, error) {
 		l := s.Text()
 		sls := strings.Split(l, ",")
 		for j, sl := range sls {
-			// fmt.Printf("\t dbg: sl = %s , ", sl)
 			c := colorOfName(strings.Trim(sl, " \t"))
 			if c != NC { // it should never be "NC" in this context
 				b.Add(i, c)
@@ -185,16 +184,13 @@ func LoadBoard(fn string) (Board, error) {
 				break
 			}
 		}
-		// fmt.Println("  dbg: done with line ", i)
 	}
-	// fmt.Println("  dbg: done loading board from file")
 	f.Close()
 
 	return b, nil
 }
 
 func (b *Board) Add(t, c int) {
-	// fmt.Printf("      dbg: (Board) adding %s to tube %d\n", color_names[c], t)
 	b.tubes[t].add(c)
 }
 
@@ -260,7 +256,6 @@ func (b Board) ValidMoves() list.List {
 		if !b.tubes[fr].IsEmpty() &&
 			!b.tubes[fr].IsDone() {
 			for to := 0; to < NUM_TUBES; to++ {
-				// fmt.Println("  dbg: checking ", fr, " to ", to)
 				if fr != to &&
 					!b.tubes[to].IsFull() {
 					if b.tubes[to].IsEmpty() ||
@@ -308,8 +303,6 @@ func (b Board) DoMove(m Move, quiet bool) Board {
 	 **/
 
 	r.Add(m.Dst, r.tubes[m.Src].pour())
-	// fmt.Println("    DoMove: after pouring:")
-	// fmt.Println(r)
 	for !r.tubes[m.Src].IsEmpty() && r.tubes[m.Dst].Top() == r.tubes[m.Src].Top() &&
 		!r.tubes[m.Dst].IsFull() {
 		r.Add(m.Dst, r.tubes[m.Src].pour())
@@ -330,8 +323,7 @@ func (b Board) IsSolved() bool {
 	return true
 }
 
-func (b Board) Equals(othr Board) bool {
-	// fmt.Println("\t  \t  dbg: comparing boards")
+func (b Board) Equals_orig(othr Board) bool {
 	// NOTE:
 	// right now (5/28/2023), I could, *theoretically*, just compare the
 	// tubes array(s)  (i.e. `b.tubes != ohtr.tubes`)
@@ -340,6 +332,40 @@ func (b Board) Equals(othr Board) bool {
 	for i := 0; i < NUM_TUBES; i++ {
 		if !b.tubes[i].Equals(othr.tubes[i]) {
 			// fmt.Printf("\t  \t  dbg: tubes at %d  are not equal\n", i)
+			return false
+		}
+	}
+	return true
+}
+
+func (b Board) Equals(othr Board) bool {
+	// initialize an array of indices, `ci` to the corresponding tubes of `othr`
+	// such that, if everything "matches," tubes[i] == othr.tubes[ci[i]]
+	var cs [NUM_TUBES]int
+	/* var ci [NUM_TUBES]int  // I don't need this
+	 */
+	for x := 0; x < NUM_TUBES; x++ {
+		cs[x] = x
+		/* ci[x] = -1   // I don't need tnis
+		 */
+	}
+
+	for t := 0; t < NUM_TUBES; t++ {
+		// find the index of the tube in `othr` that matches `b.tubes[t]`
+		ck := -1
+		for i := 0; i < NUM_TUBES; i++ {
+			if cs[i] != -1 {
+				if b.tubes[t].Equals(othr.tubes[cs[i]]) {
+					/* ci[t] = cs[i]  // I don't need this
+					 */ck = cs[i]
+					cs[i] = -1
+					break
+				}
+			}
+		}
+		/* if ci[t] == -1 { // I don't need this
+		 */
+		if ck == -1 {
 			return false
 		}
 	}
