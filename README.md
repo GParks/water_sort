@@ -16,6 +16,7 @@ See [the Go ReadMe](go/solv_watr_sort/README.md) for a link to the game/app in t
 3. C++, or maybe another that I know
 4. [Clojure](https://clojure.org/) (and/or Common Lisp)...
 5. maybe [Switft](https://www.swift.org/)
+
 here, the order may change, but options include:
 * [Groovy](https://groovy-lang.org/)
 * Haskell, or OCaml ...
@@ -23,6 +24,7 @@ here, the order may change, but options include:
 * [Rust](https://www.rust-lang.org/)
 * [Julia](https://julialang.org/)
 * SmallTalk ([Squeak](https://squeak.org/))
+* [Carbon](https://9to5google.com/2022/07/19/carbon-programming-language-google-cpp/)
 
 ... the [possibilities]((https://en.wikipedia.org/wiki/List_of_programming_languages)) are [endless](https://medium.com/web-development-zone/a-complete-list-of-computer-programming-languages-1d8bc5a891f)
 
