@@ -1,6 +1,16 @@
 # Water Sort
 **Solving the Water Sort game**
 
+### Executing the program
+Here is the cmd line I executed "last" &ndash; this is the prog. that has been running for 36 hrs.
+
+    ./solv_watr_sort -q -i 1000000 first.brd | tee test_run_q_1000000.txt | grep "pushing back"
+
+The resulting file was over 200k.
+
+
+## Introduction
+
 This project had three goals &ndash; and a fourth to document the other three; 
 
 1. to learn what [CoPilot](https://github.com/features/copilot) could do
